@@ -1,7 +1,6 @@
 package com.xin.netty.reactor;
 
 
-
 import java.io.IOException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -26,7 +25,7 @@ public class Handler implements Runnable {
     @Override
     public void run() {
         //TODO:处理逻辑
-        System.out.printf("thread name :" +Thread.currentThread().getName());
+        System.out.printf("thread name :" + Thread.currentThread().getName());
     }
 }
 

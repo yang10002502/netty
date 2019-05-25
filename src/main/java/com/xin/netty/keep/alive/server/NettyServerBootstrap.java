@@ -17,11 +17,11 @@ public class NettyServerBootstrap {
         this.port = port;
     }
 
-    private void run() throws Exception{
-        EventLoopGroup boss=new NioEventLoopGroup();
-        EventLoopGroup worker=new NioEventLoopGroup();
-        ServerBootstrap bootstrap=new io.netty.bootstrap.ServerBootstrap();
-        bootstrap.group(boss,worker);
+    private void run() throws Exception {
+        EventLoopGroup boss = new NioEventLoopGroup();
+        EventLoopGroup worker = new NioEventLoopGroup();
+        ServerBootstrap bootstrap = new io.netty.bootstrap.ServerBootstrap();
+        bootstrap.group(boss, worker);
         bootstrap.channel(NioServerSocketChannel.class);
         bootstrap.option(ChannelOption.SO_BACKLOG, 128);             //设置连接客户端的个数
         bootstrap.option(ChannelOption.TCP_NODELAY, true);           //禁用nagle算法，确保低延迟
@@ -35,8 +35,8 @@ public class NettyServerBootstrap {
                 cp.addLast(new ServerHandler());
             }
         });
-        ChannelFuture f= bootstrap.bind(port).sync();
-        if(f.isSuccess()){
+        ChannelFuture f = bootstrap.bind(port).sync();
+        if (f.isSuccess()) {
             System.out.println("......server start......");
         }
     }

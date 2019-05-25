@@ -13,7 +13,7 @@ public class EchoClientHandler extends ChannelInboundHandlerAdapter {
      * Creates a client-side handler.
      */
     public EchoClientHandler() {
-        byte[] message="hello,i miss you".getBytes();
+        byte[] message = "hello,i miss you".getBytes();
         firstMessage = Unpooled.buffer(message.length);
         firstMessage.writeBytes(message);
     }

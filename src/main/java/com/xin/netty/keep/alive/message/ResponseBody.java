@@ -17,5 +17,4 @@ public class ResponseBody implements Serializable {
         this.info = info;
     }
 
-
 }

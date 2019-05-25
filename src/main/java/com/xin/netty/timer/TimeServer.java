@@ -34,7 +34,7 @@ public class TimeServer {
     private class ChildChannelHandler extends ChannelInitializer<SocketChannel> {
         @Override
         protected void initChannel(SocketChannel ch) throws Exception {
-            ch.pipeline().addLast("timeServerHandler",new TimeServerHandler());
+            ch.pipeline().addLast("timeServerHandler", new TimeServerHandler());
         }
     }
 

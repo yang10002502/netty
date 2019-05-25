@@ -16,6 +16,7 @@ public class ObjectTransferClientHandler extends ChannelInboundHandlerAdapter {
 
     /**
      * 客户端连接服务器成功触发
+     *
      * @param ctx
      * @throws Exception
      */
@@ -28,6 +29,7 @@ public class ObjectTransferClientHandler extends ChannelInboundHandlerAdapter {
 
     /**
      * 服务端返回数据到客户端时触发
+     *
      * @param ctx
      * @param msg
      * @throws Exception
@@ -41,6 +43,7 @@ public class ObjectTransferClientHandler extends ChannelInboundHandlerAdapter {
 
     /**
      * 有异常时触发
+     *
      * @param ctx
      * @param cause
      * @throws Exception
@@ -52,6 +55,7 @@ public class ObjectTransferClientHandler extends ChannelInboundHandlerAdapter {
 
     /**
      * 与服务器断开连接时触发
+     *
      * @param ctx
      * @throws Exception
      */
@@ -63,6 +67,7 @@ public class ObjectTransferClientHandler extends ChannelInboundHandlerAdapter {
 
     /**
      * 一段时间未进行读写操作时触发
+     *
      * @param ctx
      * @param evt
      * @throws Exception

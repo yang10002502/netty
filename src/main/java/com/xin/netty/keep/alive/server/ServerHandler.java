@@ -20,26 +20,26 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         super.channelRead(ctx, msg);
-        if(msg instanceof BaseMsg){
-            BaseMsg baseMsg=(BaseMsg) msg;
-            switch (baseMsg.getType()){
-                case LOGIN:{
+        if (msg instanceof BaseMsg) {
+            BaseMsg baseMsg = (BaseMsg) msg;
+            switch (baseMsg.getType()) {
+                case LOGIN: {
                     LoginMsg loginMsg = (LoginMsg) baseMsg;
                     System.out.println(loginMsg);
-                    LoginReplyMsg loginReplyMsg=new LoginReplyMsg();
+                    LoginReplyMsg loginReplyMsg = new LoginReplyMsg();
                     loginReplyMsg.setInfo("登陆成功");
                     ctx.writeAndFlush(loginReplyMsg);
                     break;
                 }
-                case PING:{
+                case PING: {
                     System.out.println("收到PING消息");
                     PongMsg pongMsg = new PongMsg();
                     ctx.writeAndFlush(pongMsg);
                     break;
                 }
-                case REQUEST:{
+                case REQUEST: {
                     RequestMsg requestMsg = (RequestMsg) baseMsg;
-                    System.out.println("收到客户端的请求消息："+requestMsg.getRequestBody().getInfo());
+                    System.out.println("收到客户端的请求消息：" + requestMsg.getRequestBody().getInfo());
                     ResponseMsg responseMsg = new ResponseMsg();
                     responseMsg.setResponseBody(new ResponseBody("收到你得请求，正在处理中，请稍后。。。"));
                     ctx.writeAndFlush(responseMsg);

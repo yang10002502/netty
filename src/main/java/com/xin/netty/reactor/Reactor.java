@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 
-public class Reactor implements Runnable{
+public class Reactor implements Runnable {
 
     Selector selector;
 

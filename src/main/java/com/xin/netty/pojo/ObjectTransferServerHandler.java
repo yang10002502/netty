@@ -7,20 +7,20 @@ public class ObjectTransferServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if(msg instanceof User){
-            User user=(User) msg;
-            System.out.printf("this message type is user and user name is :"+user.getName());
-        }else{
-            System.out.printf("this message type is not user and info is :"+msg);
+        if (msg instanceof User) {
+            User user = (User) msg;
+            System.out.printf("this message type is user and user name is :" + user.getName());
+        } else {
+            System.out.printf("this message type is not user and info is :" + msg);
         }
         ctx.writeAndFlush(msg);
     }
 
-     @Override
-     public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-         ctx.flush();
-         ctx.close();
-     }
+    @Override
+    public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+        ctx.flush();
+        ctx.close();
+    }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
