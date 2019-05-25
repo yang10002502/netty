@@ -32,6 +32,7 @@ public class ServerHandler extends ChannelInboundHandlerAdapter {
                     break;
                 }
                 case PING: {
+//                    System.out.print(LocalDateTime.now());
                     System.out.println("收到PING消息");
                     PongMsg pongMsg = new PongMsg();
                     ctx.writeAndFlush(pongMsg);

@@ -4,6 +4,8 @@ import com.xin.netty.keep.alive.message.*;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
+import java.time.LocalDateTime;
+
 public class ClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
@@ -37,7 +39,9 @@ public class ClientHandler extends ChannelInboundHandlerAdapter {
                 }
                 case PONG: {
                     //收到PING的回复消息PONG，不做任何处理
-                    System.out.println("收到服务端回复的PONG消息");
+                    LocalDateTime now = LocalDateTime.now();
+                    System.out.print(LocalDateTime.now());
+                    System.out.println(" 收到服务端回复的PONG消息");
                     break;
                 }
                 case RESPONSE: {
