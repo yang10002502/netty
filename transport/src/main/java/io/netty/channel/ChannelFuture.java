@@ -161,6 +161,9 @@ import java.util.concurrent.TimeUnit;
  *     // Connection established successfully
  * }
  * </pre>
+ *
+ * ChannelFuture继承了Netty的Future接口，代表 Netty channel的I/O操作的执行结果。
+ * 在Netty中所有的I/O操作都是异步的，会立即返回一个代表I/O操作的结果，即ChannelFuture
  */
 public interface ChannelFuture extends Future<Void> {
 

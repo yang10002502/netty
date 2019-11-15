@@ -135,6 +135,11 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return name;
     }
 
+    /**
+     * 执行 handler 的注册成功之后的回调方法
+     * 该方法调用的是 head Context 的 invokeChannelRegistered 静态方法，
+     * 注意，这里的参数很重要，我们进入 findContextInbound 方法内部查看
+     */
     @Override
     public ChannelHandlerContext fireChannelRegistered() {
         invokeChannelRegistered(findContextInbound(MASK_CHANNEL_REGISTERED));
@@ -143,9 +148,17 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
 
     static void invokeChannelRegistered(final AbstractChannelHandlerContext next) {
         EventExecutor executor = next.executor();
+        // 获取 head 的 执行器EventLoop，用于判断是否在当前线程
         if (executor.inEventLoop()) {
+            // next 节点就是我设置的 LoggingHandler 对应的 Context，获取对应的 EventLoop。
+            // 从这里我们总结一下 netty 的 Handler 设计：Netty 初始了一个 pipeline，
+            // pipeline 内部维护着一个 ChannelContextContext 双向链表，
+            // Context 是对 Handler 的封装，是 pipeline 和 Handler 沟通的关键，
+            // 每次信息入站，从 head 节点开始，执行 context 的 handler 的对应方法，
+            // 执行结束通过 findContextInbound() 方法找到下一个节点，继续执行
             next.invokeChannelRegistered();
         } else {
+            // 如果在当前线程，则立即执行 invokeChannelRegistered 方法，否则异步执行，我们这里当然是在当前线程。所以同步执行
             executor.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -298,15 +311,15 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
             } catch (Throwable error) {
                 if (logger.isDebugEnabled()) {
                     logger.debug(
-                        "An exception {}" +
-                        "was thrown by a user handler's exceptionCaught() " +
-                        "method while handling the following exception:",
-                        ThrowableUtil.stackTraceToString(error), cause);
+                            "An exception {}" +
+                                    "was thrown by a user handler's exceptionCaught() " +
+                                    "method while handling the following exception:",
+                            ThrowableUtil.stackTraceToString(error), cause);
                 } else if (logger.isWarnEnabled()) {
                     logger.warn(
-                        "An exception '{}' [enable DEBUG level for full stacktrace] " +
-                        "was thrown by a user handler's exceptionCaught() " +
-                        "method while handling the following exception:", error, cause);
+                            "An exception '{}' [enable DEBUG level for full stacktrace] " +
+                                    "was thrown by a user handler's exceptionCaught() " +
+                                    "method while handling the following exception:", error, cause);
                 }
             }
         } else {
@@ -482,9 +495,11 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
             return promise;
         }
 
+        // 找到出站节点
         final AbstractChannelHandlerContext next = findContextOutbound(MASK_BIND);
         EventExecutor executor = next.executor();
         if (executor.inEventLoop()) {
+            // 执行出站节点的invokeBind 方法
             next.invokeBind(localAddress, promise);
         } else {
             safeExecute(executor, new Runnable() {
@@ -500,6 +515,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     private void invokeBind(SocketAddress localAddress, ChannelPromise promise) {
         if (invokeHandler()) {
             try {
+                // context 调用handler 的bind 方法
                 ((ChannelOutboundHandler) handler()).bind(this, localAddress, promise);
             } catch (Throwable t) {
                 notifyOutboundHandlerException(t, promise);
@@ -794,7 +810,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
             final AbstractWriteTask task;
             if (flush) {
                 task = WriteAndFlushTask.newInstance(next, m, promise);
-            }  else {
+            } else {
                 task = WriteTask.newInstance(next, m, promise);
             }
             if (!safeExecute(executor, task, promise, m)) {
@@ -912,6 +928,11 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         return false;
     }
 
+    /**
+     * pipeline 是一个双向链表，这里链表起作用了，
+     * 通过找到当前节点的下一个节点，并返回，
+     * 但这判断的是：必须是入站类型的
+     */
     private AbstractChannelHandlerContext findContextInbound(int mask) {
         AbstractChannelHandlerContext ctx = this;
         do {
@@ -938,7 +959,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     }
 
     final boolean setAddComplete() {
-        for (;;) {
+        for (; ; ) {
             int oldState = handlerState;
             if (oldState == REMOVE_COMPLETE) {
                 return false;
@@ -980,7 +1001,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
     /**
      * Makes best possible effort to detect if {@link ChannelHandler#handlerAdded(ChannelHandlerContext)} was called
      * yet. If not return {@code false} and if called or could not detect return {@code true}.
-     *
+     * <p>
      * If this method returns {@code false} we will not invoke the {@link ChannelHandler} but just forward the event.
      * This is needed as {@link DefaultChannelPipeline} may already put the {@link ChannelHandler} in the linked-list
      * but not called {@link ChannelHandler#handlerAdded(ChannelHandlerContext)}.
@@ -1134,7 +1155,7 @@ abstract class AbstractChannelHandlerContext implements ChannelHandlerContext, R
         };
 
         static WriteAndFlushTask newInstance(
-                AbstractChannelHandlerContext ctx, Object msg,  ChannelPromise promise) {
+                AbstractChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
             WriteAndFlushTask task = RECYCLER.get();
             init(task, ctx, msg, promise);
             return task;

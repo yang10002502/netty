@@ -28,7 +28,6 @@ import java.util.concurrent.ThreadFactory;
 
 /**
  * Abstract base class for {@link EventLoop}s that execute all its submitted tasks in a single thread.
- *
  */
 public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor implements EventLoop {
 
@@ -71,12 +70,15 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
 
     @Override
     public ChannelFuture register(Channel channel) {
+        // this就是EventLoop（单例线程池）
         return register(new DefaultChannelPromise(channel, this));
     }
 
     @Override
     public ChannelFuture register(final ChannelPromise promise) {
         ObjectUtil.checkNotNull(promise, "promise");
+        // NioServerSocketChannel 的 unsafe方法获取创建NioServerSocketChannel对象时同时创建的 NioMessageUnsafe 对象,
+        // 最后调用 NioMessageUnsafe 的 register 方法
         promise.channel().unsafe().register(this, promise);
         return promise;
     }
@@ -120,7 +122,6 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
      * Removes a task that was added previously via {@link #executeAfterEventLoopIteration(Runnable)}.
      *
      * @param task to be removed.
-     *
      * @return {@code true} if the task was removed as a result of this call.
      */
     @UnstableApi
@@ -161,5 +162,6 @@ public abstract class SingleThreadEventLoop extends SingleThreadEventExecutor im
     /**
      * Marker interface for {@link Runnable} that will not trigger an {@link #wakeup(boolean)} in all cases.
      */
-    interface NonWakeupRunnable extends Runnable { }
+    interface NonWakeupRunnable extends Runnable {
+    }
 }

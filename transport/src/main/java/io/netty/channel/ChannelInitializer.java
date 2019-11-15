@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * A special {@link ChannelInboundHandler} which offers an easy way to initialize a {@link Channel} once it was
  * registered to its {@link EventLoop}.
- *
+ * <p>
  * Implementations are most often used in the context of {@link Bootstrap#handler(ChannelHandler)} ,
  * {@link ServerBootstrap#handler(ChannelHandler)} and {@link ServerBootstrap#childHandler(ChannelHandler)} to
  * setup the {@link ChannelPipeline} of a {@link Channel}.
@@ -48,7 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * </pre>
  * Be aware that this class is marked as {@link Sharable} and so the implementation must be safe to be re-used.
  *
- * @param <C>   A sub-type of {@link Channel}
+ * @param <C> A sub-type of {@link Channel}
  */
 @Sharable
 public abstract class ChannelInitializer<C extends Channel> extends ChannelInboundHandlerAdapter {
@@ -62,19 +62,20 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
     /**
      * This method will be called once the {@link Channel} was registered. After the method returns this instance
      * will be removed from the {@link ChannelPipeline} of the {@link Channel}.
+     * 此方法将在注册channel后调用，可被初始化服务端重写该方法，设置处理事件ChannelPipeline
      *
-     * @param ch            the {@link Channel} which was registered.
-     * @throws Exception    is thrown if an error occurs. In that case it will be handled by
-     *                      {@link #exceptionCaught(ChannelHandlerContext, Throwable)} which will by default close
-     *                      the {@link Channel}.
+     * @param ch the {@link Channel} which was registered.
+     * @throws Exception is thrown if an error occurs. In that case it will be handled by
+     *                   {@link #exceptionCaught(ChannelHandlerContext, Throwable)} which will by default close
+     *                   the {@link Channel}.
      */
     protected abstract void initChannel(C ch) throws Exception;
 
     @Override
     @SuppressWarnings("unchecked")
     public final void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-        // Normally this method will never be called as handlerAdded(...) should call initChannel(...) and remove
-        // the handler.
+        // Normally this method will never be called as handlerAdded(...) should call initChannel(...) and remove the handler.
+        // 通常这个方法永远不会被调用
         if (initChannel(ctx)) {
             // we called initChannel(...) so we need to call now pipeline.fireChannelRegistered() to ensure we not
             // miss an event.
@@ -90,6 +91,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
 
     /**
      * Handle the {@link Throwable} by logging and closing the {@link Channel}. Sub-classes may override this.
+     * 处理异常并关闭channel，子类可以覆盖此方法
      */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
@@ -101,6 +103,7 @@ public abstract class ChannelInitializer<C extends Channel> extends ChannelInbou
 
     /**
      * {@inheritDoc} If override this method ensure you call super!
+     * 如果重写该方法，请确认调用父类的此方法
      */
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {

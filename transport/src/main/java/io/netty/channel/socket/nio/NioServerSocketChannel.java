@@ -42,8 +42,7 @@ import java.util.Map;
  * A {@link io.netty.channel.socket.ServerSocketChannel} implementation which uses
  * NIO selector based implementation to accept new connections.
  */
-public class NioServerSocketChannel extends AbstractNioMessageChannel
-                             implements io.netty.channel.socket.ServerSocketChannel {
+public class NioServerSocketChannel extends AbstractNioMessageChannel implements io.netty.channel.socket.ServerSocketChannel {
 
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);
     private static final SelectorProvider DEFAULT_SELECTOR_PROVIDER = SelectorProvider.provider();
@@ -56,8 +55,11 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
              *  Use the {@link SelectorProvider} to open {@link SocketChannel} and so remove condition in
              *  {@link SelectorProvider#provider()} which is called by each ServerSocketChannel.open() otherwise.
              *
+             *  使用SelectorProvider打开SocketChannel，然后删除SelectorProvider中的条件，否则每个ServerSocketChannel.open（）都会调用该条件。
+             *
              *  See <a href="https://github.com/netty/netty/issues/2308">#2308</a>.
              */
+            // 通过provider创建一个ServerSocketChannel
             return provider.openServerSocketChannel();
         } catch (IOException e) {
             throw new ChannelException(
@@ -69,6 +71,12 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
 
     /**
      * Create a new instance
+     * NioServerSocketChannel 的构造过程如下：
+     * 1、通过 NIO 的SelectorProvider 的 openServerSocketChannel 方法得到JDK 的 channel。
+     *    目的是让 Netty 包装 JDK 的 channel。同时设置刚兴趣的事件为 ACCEPT和非阻塞
+     * 2、创建了一个唯一的 ChannelId，创建了一个 NioMessageUnsafe，用于操作消息，
+     *    创建了一个 DefaultChannelPipeline 管道，是个双向链表结构，用于过滤所有的进出的消息。
+     * 3、创建了一个 NioServerSocketChannelConfig 对象，用于对外展示一些配置。
      */
     public NioServerSocketChannel() {
         this(newSocket(DEFAULT_SELECTOR_PROVIDER));
@@ -83,6 +91,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
 
     /**
      * Create a new instance using the given {@link ServerSocketChannel}.
+     * 调用父类的构造器，并传入ACCEPT，并创建一个config对象用于展示自己
      */
     public NioServerSocketChannel(ServerSocketChannel channel) {
         super(null, channel, SelectionKey.OP_ACCEPT);
@@ -164,8 +173,7 @@ public class NioServerSocketChannel extends AbstractNioMessageChannel
 
     // Unnecessary stuff
     @Override
-    protected boolean doConnect(
-            SocketAddress remoteAddress, SocketAddress localAddress) throws Exception {
+    protected boolean doConnect(SocketAddress remoteAddress, SocketAddress localAddress) throws Exception {
         throw new UnsupportedOperationException();
     }
 

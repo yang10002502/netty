@@ -27,8 +27,7 @@ final class LocalChannelRegistry {
 
     private static final ConcurrentMap<LocalAddress, Channel> boundChannels = PlatformDependent.newConcurrentHashMap();
 
-    static LocalAddress register(
-            Channel channel, LocalAddress oldLocalAddress, SocketAddress localAddress) {
+    static LocalAddress register(Channel channel, LocalAddress oldLocalAddress, SocketAddress localAddress) {
         if (oldLocalAddress != null) {
             throw new ChannelException("already bound");
         }

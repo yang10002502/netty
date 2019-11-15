@@ -35,18 +35,18 @@ public class DefaultChannelPromise extends DefaultPromise<Void> implements Chann
     /**
      * Creates a new instance.
      *
-     * @param channel
-     *        the {@link Channel} associated with this future
+     * @param channel the {@link Channel} associated with this future
      */
     public DefaultChannelPromise(Channel channel) {
         this.channel = checkNotNull(channel, "channel");
     }
 
     /**
-     * Creates a new instance.
-     *
-     * @param channel
-     *        the {@link Channel} associated with this future
+     * DefaultChannelPromise似 Future，事实上也继承了 JDK 的 Future，但增加了很多功能，
+     * 比如 JDK 的 Future 虽然是异步的，但仍需要 get 方法 阻塞获取结果才能坐之后的事情，
+     * 而 Promise 可以通过设置监听器的方式，在方法执行成功或者失败的情况下无需等待，
+     * 就能执行监听器中的任务，效率币 Future 高很多。
+     * 从某种程度上说，Future 是非阻塞，而Promise 才是正在的异步
      */
     public DefaultChannelPromise(Channel channel, EventExecutor executor) {
         super(executor);

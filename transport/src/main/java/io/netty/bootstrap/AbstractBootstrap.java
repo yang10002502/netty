@@ -124,8 +124,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      * is not working for you because of some more complex needs. If your {@link Channel} implementation
      * has a no-args constructor, its highly recommend to just use {@link #channel(Class)} to
      * simplify your code.
+     * 设置Channel类型，赋值给channelFactory
      */
-    @SuppressWarnings({ "unchecked", "deprecation" })
+    @SuppressWarnings({"unchecked", "deprecation"})
     public B channelFactory(io.netty.channel.ChannelFactory<? extends C> channelFactory) {
         return channelFactory((ChannelFactory<C>) channelFactory);
     }
@@ -162,14 +163,19 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     /**
      * Allow to specify a {@link ChannelOption} which is used for the {@link Channel} instances once they got
      * created. Use a value of {@code null} to remove a previous set {@link ChannelOption}.
+     * 设置ChannelOption，该选项在创建Channel实例后用于这些实例。
+     * 使用value为null来删除以前的集合中的ChannelOption。
      */
     public <T> B option(ChannelOption<T> option, T value) {
+        // 校验option键值是否为null，若为null，则抛出空指针错误
         ObjectUtil.checkNotNull(option, "option");
         if (value == null) {
+            // 若value为null，则删除该option
             synchronized (options) {
                 options.remove(option);
             }
         } else {
+            // 若option和value都不为null，则添加设置到options中（LinkedHashMap）
             synchronized (options) {
                 options.put(option, value);
             }
@@ -276,11 +282,14 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
 
         if (regFuture.isDone()) {
             // At this point we know that the registration was complete and successful.
+            // 到这一步，则注册成功
             ChannelPromise promise = channel.newPromise();
+            // 重点方法（完成对端口的绑定）！！！
             doBind0(regFuture, channel, localAddress, promise);
             return promise;
         } else {
             // Registration future is almost always fulfilled already, but just in case it's not.
+            // 注册几乎都是成功的，但以防万一
             final PendingRegistrationPromise promise = new PendingRegistrationPromise(channel);
             regFuture.addListener(new ChannelFutureListener() {
                 @Override
@@ -289,10 +298,13 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
                     if (cause != null) {
                         // Registration on the EventLoop failed so fail the ChannelPromise directly to not cause an
                         // IllegalStateException once we try to access the EventLoop of the Channel.
+                        // 在EventLoop上注册失败，因此在尝试访问通道的EventLoop后，
+                        // ChannelPromise将直接失败，以不导致IllegalStateException
                         promise.setFailure(cause);
                     } else {
                         // Registration was successful, so set the correct executor to use.
                         // See https://github.com/netty/netty/issues/2586
+                        // 注册成功，设置正确的执行器
                         promise.registered();
 
                         doBind0(regFuture, channel, localAddress, promise);
@@ -303,10 +315,17 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
     }
 
+    /**
+     * 初始化NioServerSocketChannel通道，注册各个handler，返回future
+     *
+     * @return
+     */
     final ChannelFuture initAndRegister() {
         Channel channel = null;
         try {
+            // 在ReflectiveChannelFactory中通过构造函数创建对象NioServerSocketChannel
             channel = channelFactory.newChannel();
+            // 定义模板方法，具体交由ServerBootstrap、Bootstrap实现
             init(channel);
         } catch (Throwable t) {
             if (channel != null) {
@@ -319,6 +338,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             return new DefaultChannelPromise(new FailedChannel(), GlobalEventExecutor.INSTANCE).setFailure(t);
         }
 
+        // 通过ServerBootstrap的bossGroup注册NioServerSocketChannel
         ChannelFuture regFuture = config().group().register(channel);
         if (regFuture.cause() != null) {
             if (channel.isRegistered()) {
@@ -337,17 +357,23 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         //         because bind() or connect() will be executed *after* the scheduled registration task is executed
         //         because register(), bind(), and connect() are all bound to the same thread.
 
+
         return regFuture;
     }
 
     abstract void init(Channel channel) throws Exception;
 
-    private static void doBind0(
-            final ChannelFuture regFuture, final Channel channel,
-            final SocketAddress localAddress, final ChannelPromise promise) {
-
+    /**
+     * 完成对端口的绑定
+     * 向 NioServerSocketChannel 的 eventLoop 提交了一个任务，
+     * 当 future(其实就是 promise) 成功后执行 NioServerSocketChannel
+     * 的 bind 方法，并添加一个关闭监听器
+     */
+    private static void doBind0(final ChannelFuture regFuture, final Channel channel,
+                                final SocketAddress localAddress, final ChannelPromise promise) {
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
+        // 在触发channelRegistered（）之前调用此方法。让用户处理程序有机会在其channelRegistered（）实现中设置管道。
         channel.eventLoop().execute(new Runnable() {
             @Override
             public void run() {
@@ -424,23 +450,21 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         return copiedMap(attrs);
     }
 
-    static void setChannelOptions(
-            Channel channel, Map<ChannelOption<?>, Object> options, InternalLogger logger) {
-        for (Map.Entry<ChannelOption<?>, Object> e: options.entrySet()) {
+    static void setChannelOptions(Channel channel, Map<ChannelOption<?>, Object> options, InternalLogger logger) {
+        for (Map.Entry<ChannelOption<?>, Object> e : options.entrySet()) {
+            // 依次遍历，将options值设置到ServerSocketChannelConfig类型变量config中
             setChannelOption(channel, e.getKey(), e.getValue(), logger);
         }
     }
 
-    static void setChannelOptions(
-            Channel channel, Map.Entry<ChannelOption<?>, Object>[] options, InternalLogger logger) {
-        for (Map.Entry<ChannelOption<?>, Object> e: options) {
+    static void setChannelOptions(Channel channel, Map.Entry<ChannelOption<?>, Object>[] options, InternalLogger logger) {
+        for (Map.Entry<ChannelOption<?>, Object> e : options) {
             setChannelOption(channel, e.getKey(), e.getValue(), logger);
         }
     }
 
     @SuppressWarnings("unchecked")
-    private static void setChannelOption(
-            Channel channel, ChannelOption<?> option, Object value, InternalLogger logger) {
+    private static void setChannelOption(Channel channel, ChannelOption<?> option, Object value, InternalLogger logger) {
         try {
             if (!channel.config().setOption((ChannelOption<Object>) option, value)) {
                 logger.warn("Unknown channel option '{}' for channel '{}'", option, channel);
@@ -454,8 +478,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     @Override
     public String toString() {
         StringBuilder buf = new StringBuilder()
-            .append(StringUtil.simpleClassName(this))
-            .append('(').append(config()).append(')');
+                .append(StringUtil.simpleClassName(this))
+                .append('(').append(config()).append(')');
         return buf.toString();
     }
 

@@ -23,16 +23,19 @@ public interface ChannelInboundHandler extends ChannelHandler {
 
     /**
      * The {@link Channel} of the {@link ChannelHandlerContext} was registered with its {@link EventLoop}
+     * ChannelHandlerContext中的Channel在EventLoop注册上时
      */
     void channelRegistered(ChannelHandlerContext ctx) throws Exception;
 
     /**
      * The {@link Channel} of the {@link ChannelHandlerContext} was unregistered from its {@link EventLoop}
+     * ChannelHandlerContext中的Channel从EventLoop未注册时
      */
     void channelUnregistered(ChannelHandlerContext ctx) throws Exception;
 
     /**
      * The {@link Channel} of the {@link ChannelHandlerContext} is now active
+     * ChannelHandlerContext中的Channel时活跃时
      */
     void channelActive(ChannelHandlerContext ctx) throws Exception;
 

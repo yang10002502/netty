@@ -30,6 +30,7 @@
 
   <properties>
     <javaModuleName>io.netty.resolver.dns</javaModuleName>
+    <skipTests>true</skipTests>
   </properties>
 
   <dependencies>

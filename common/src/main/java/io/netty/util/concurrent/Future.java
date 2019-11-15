@@ -26,31 +26,31 @@ import java.util.concurrent.TimeUnit;
 public interface Future<V> extends java.util.concurrent.Future<V> {
 
     /**
-     * Returns {@code true} if and only if the I/O operation was completed
-     * successfully.
+     * Returns {@code true} if and only if the I/O operation was completed successfully.
+     * 仅当I/O操作成功操作时才返回true
      */
     boolean isSuccess();
 
     /**
      * returns {@code true} if and only if the operation can be cancelled via {@link #cancel(boolean)}.
+     * 仅当通过cancel方法执行取消操作才返回true
      */
     boolean isCancellable();
 
     /**
-     * Returns the cause of the failed I/O operation if the I/O operation has
-     * failed.
+     * Returns the cause of the failed I/O operation if the I/O operation has failed.
+     * 如果I/O操作失败，则返回失败的原因
      *
      * @return the cause of the failure.
-     *         {@code null} if succeeded or this future is not
-     *         completed yet.
+     * {@code null} if succeeded or this future is not completed yet.
      */
     Throwable cause();
 
     /**
-     * Adds the specified listener to this future.  The
-     * specified listener is notified when this future is
-     * {@linkplain #isDone() done}.  If this future is already
-     * completed, the specified listener is notified immediately.
+     * Adds the specified listener to this future.  The specified listener is notified when this future is
+     * {@linkplain #isDone() done}.  If this future is already completed, the specified listener is notified immediately.
+     * 当操作已完成(isDone 方法返回完成)，将会通知指定的监听器；
+     * 如果 Future 对象已完成，则理解通知指定的监听器。
      */
     Future<V> addListener(GenericFutureListener<? extends Future<? super V>> listener);
 
@@ -58,7 +58,6 @@ public interface Future<V> extends java.util.concurrent.Future<V> {
      * Adds the specified listeners to this future.  The
      * specified listeners are notified when this future is
      * {@linkplain #isDone() done}.  If this future is already
-     * completed, the specified listeners are notified immediately.
      */
     Future<V> addListeners(GenericFutureListener<? extends Future<? super V>>... listeners);
 
@@ -95,8 +94,7 @@ public interface Future<V> extends java.util.concurrent.Future<V> {
     /**
      * Waits for this future to be completed.
      *
-     * @throws InterruptedException
-     *         if the current thread was interrupted
+     * @throws InterruptedException if the current thread was interrupted
      */
     Future<V> await() throws InterruptedException;
 
@@ -112,10 +110,8 @@ public interface Future<V> extends java.util.concurrent.Future<V> {
      * specified time limit.
      *
      * @return {@code true} if and only if the future was completed within
-     *         the specified time limit
-     *
-     * @throws InterruptedException
-     *         if the current thread was interrupted
+     * the specified time limit
+     * @throws InterruptedException if the current thread was interrupted
      */
     boolean await(long timeout, TimeUnit unit) throws InterruptedException;
 
@@ -124,10 +120,8 @@ public interface Future<V> extends java.util.concurrent.Future<V> {
      * specified time limit.
      *
      * @return {@code true} if and only if the future was completed within
-     *         the specified time limit
-     *
-     * @throws InterruptedException
-     *         if the current thread was interrupted
+     * the specified time limit
+     * @throws InterruptedException if the current thread was interrupted
      */
     boolean await(long timeoutMillis) throws InterruptedException;
 
@@ -137,7 +131,7 @@ public interface Future<V> extends java.util.concurrent.Future<V> {
      * {@link InterruptedException} and discards it silently.
      *
      * @return {@code true} if and only if the future was completed within
-     *         the specified time limit
+     * the specified time limit
      */
     boolean awaitUninterruptibly(long timeout, TimeUnit unit);
 
@@ -147,13 +141,13 @@ public interface Future<V> extends java.util.concurrent.Future<V> {
      * {@link InterruptedException} and discards it silently.
      *
      * @return {@code true} if and only if the future was completed within
-     *         the specified time limit
+     * the specified time limit
      */
     boolean awaitUninterruptibly(long timeoutMillis);
 
     /**
      * Return the result without blocking. If the future is not done yet this will return {@code null}.
-     *
+     * <p>
      * As it is possible that a {@code null} value is used to mark the future as successful you also need to check
      * if the future is really done with {@link #isDone()} and not relay on the returned {@code null} value.
      */
@@ -161,7 +155,7 @@ public interface Future<V> extends java.util.concurrent.Future<V> {
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * If the cancellation was successful it will fail the future with an {@link CancellationException}.
      */
     @Override

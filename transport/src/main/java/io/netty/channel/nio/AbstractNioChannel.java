@@ -72,15 +72,16 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     /**
      * Create a new instance
      *
-     * @param parent            the parent {@link Channel} by which this instance was created. May be {@code null}
-     * @param ch                the underlying {@link SelectableChannel} on which it operates
-     * @param readInterestOp    the ops to set to receive data from the {@link SelectableChannel}
+     * @param parent         the parent {@link Channel} by which this instance was created. May be {@code null}
+     * @param ch             the underlying {@link SelectableChannel} on which it operates
+     * @param readInterestOp the ops to set to receive data from the {@link SelectableChannel}
      */
     protected AbstractNioChannel(Channel parent, SelectableChannel ch, int readInterestOp) {
         super(parent);
         this.ch = ch;
         this.readInterestOp = readInterestOp;
         try {
+            // 设置非阻塞
             ch.configureBlocking(false);
         } catch (IOException e) {
             try {
@@ -377,7 +378,10 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     @Override
     protected void doRegister() throws Exception {
         boolean selected = false;
-        for (;;) {
+        for (; ; ) {
+            // 死循环向JDK中注册感兴趣的事件，若成功，则返回结束；
+            // 如果失败，则调用EventLoop内部的JDK的select的selectNow方法立即返回，
+            // 然后尝试第二次注册，还报错则抛出异常
             try {
                 selectionKey = javaChannel().register(eventLoop().unwrappedSelector(), 0, this);
                 return;
@@ -404,6 +408,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     @Override
     protected void doBeginRead() throws Exception {
         // Channel.read() or ChannelHandlerContext.read() was called
+        // 在父类NioServerSocketChannel的构造函数中设置selectionKey为SelectionKey.OP_ACCEPT
         final SelectionKey selectionKey = this.selectionKey;
         if (!selectionKey.isValid()) {
             return;
@@ -413,6 +418,7 @@ public abstract class AbstractNioChannel extends AbstractChannel {
 
         final int interestOps = selectionKey.interestOps();
         if ((interestOps & readInterestOp) == 0) {
+            // 如果 key 的监听事件是0 的话，就改为 readInterestOp，即在父类方法中设置的SelectionKey.OP_ACCEPT
             selectionKey.interestOps(interestOps | readInterestOp);
         }
     }

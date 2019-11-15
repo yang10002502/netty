@@ -30,6 +30,7 @@
 
   <properties>
     <javaModuleName>io.netty.transport</javaModuleName>
+    <skipTests>true</skipTests>
   </properties>
 
   <dependencies>
